@@ -1,6 +1,8 @@
 Fast online Mandelbrot set explorer
 ===================================
 
+[https://michurin.github.io/fast-online-mandelbrot-set-explorer/](https://michurin.github.io/fast-online-mandelbrot-set-explorer/)
+
 Status
 ------
 
