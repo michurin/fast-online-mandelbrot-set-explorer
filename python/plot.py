@@ -26,10 +26,10 @@ def M(x1, x2, y1, y2, dpu, r, iters):
     v = np.zeros(sp)  # log(potential)
     for i in range(iters):
         z[t] = z[t] * z[t] + c[t]
-        a = abs(z)
+        a = np.abs(z)
         new = np.logical_and(t, a > r)
         s[new] = i
-        v[new] = np.log(np.log(a[new])) - i * np.log(2.)  # log(potential) = np.log(np.log(a[new])/np.power(2., i))
+        v[new] = np.log(np.log(a[new])) - i * np.log(2.)  # log(potential) = np.log(np.log(abs(z))/np.power(2., i))
         t[new] = False
     return t, s, v
 
@@ -42,10 +42,10 @@ def J(x1, x2, y1, y2, dpu, r, iters, c):
     v = np.zeros(sp)  # log(potential)
     for i in range(iters):
         z[t] = z[t] * z[t] + c
-        a = abs(z)
+        a = np.abs(z)
         new = np.logical_and(t, a > r)
         s[new] = i
-        v[new] = np.log(np.log(a[new])) - i * np.log(2.)  # log(potential) = np.log(np.log(a[new])/np.power(2., i))
+        v[new] = np.log(np.log(a[new])) - i * np.log(2.)  # log(potential) = np.log(np.log(abs(z))/np.power(2., i))
         t[new] = False
     return t, s, v
 
@@ -86,7 +86,7 @@ def mpart():
 def jet():
     '''Show full Julia set; escape time based (simples)'''
     borders = -2, 2, -1.5, 1.5  # full view
-    s, c, v = J(*borders, 200, 2, 1000, -0.205 + 0.647j)
+    s, c, v = J(*borders, 200, 2, 1000, -0.77 + 0.1j)
     plt.imshow(c+1, extent=borders, norm=clrs.LogNorm())
     plt.colorbar().set_label('Escape time + 1 (to avoid zeroes)')
     plt.title('Julia set. Escape time based (r=2)')
@@ -96,9 +96,9 @@ def jet():
 @cli.command()
 def jpart():
     '''Show part of Julia set; sin(log(potential)) coloring'''
-    borders = .076, .646, .034, .407
-    s, c, v = J(*borders, 1000, 2, 3000, -0.205 + 0.647j)
-    v[np.logical_not(s)] = np.sin(v[np.logical_not(s)]*.15)
+    borders = -.19, .1, .51, .88
+    s, c, v = J(*borders, 3000, 2, 3000, -0.77 + 0.1j)
+    v[np.logical_not(s)] = np.sin(v[np.logical_not(s)]*.04)
     v[s] = np.average(v[np.logical_not(s)])
     plt.imshow(v, extent=borders)
     plt.colorbar().set_label('sin(log(potential))')
