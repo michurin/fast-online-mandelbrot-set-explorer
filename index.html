@@ -15,7 +15,11 @@
     <script src="workers_pool.js"></script>
     <script src="main.js"></script>
 
+    <script src="live_canvas.js"></script>
+
     <link rel="stylesheet" href="main.css">
+
+    <link rel="stylesheet" href="live_canvas.css">
 
     <!-- TODO
     <link rel="icon" href="xxx.png" sizes="32x32" type="image/png" />
@@ -35,8 +39,22 @@
 
   </head>
   <body>
-    <canvas>
+
+    <!-- proof of concept #1 -->
+    <canvas id="mset"></canvas>
+
+    <!-- proof of concept #2 -->
+    <h3>proof of concept #2: live canvas</h3>
+    <div style="border: 10px solid #eee">
+      text
+      <div class="live" data-live-obj="One"><canvas></canvas></div>
+      text
+      <div class="live" data-live-obj="Two"><canvas></canvas></div>
+      text
+    </div>
+
     <!-- TODO iframe escaping link -->
+
     <!-- TODO addthis -->
   </body>
 </html>

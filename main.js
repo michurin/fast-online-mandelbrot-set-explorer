@@ -66,7 +66,7 @@ $(() => {
   const arena = new Arena();
   arena.setup($('canvas')[0], 400, 300, window.devicePixelRatio, -3, -1.5, 1, 1.5);
 
-  $(window).click((e) => {
+  $('canvas#mset').click((e) => {
     const { pageX, pageY } = e;
     console.log(pageX, pageY);
     arena.zoomIn(pageX, pageY);

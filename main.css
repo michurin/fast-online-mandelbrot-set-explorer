@@ -1,9 +1,9 @@
 body {
   background-color: #fff;
   margin: 0;
-  padding: 0;
+  padding: 300px 0 0 0;
 }
-canvas {
+canvas#mset {
   position: absolute;
   top: 0;
   left: 0;
