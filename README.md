@@ -1,6 +1,14 @@
 Fast online Mandelbrot set explorer
 ===================================
 
+---
+
+*upd:* I started this project to play with Web Workers API. However, it turned out that WebGL much much more faster.
+I'm playing with it here
+[https://michurin.github.io/fast-online-mandelbrot-set-explorer/webgl](https://michurin.github.io/fast-online-mandelbrot-set-explorer/webgl)
+
+---
+
 [https://michurin.github.io/fast-online-mandelbrot-set-explorer/](https://michurin.github.io/fast-online-mandelbrot-set-explorer/)
 
 Status
