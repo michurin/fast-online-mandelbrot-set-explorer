@@ -63,7 +63,7 @@ void main() {
 
   cr = c.x;
   ci = c.y;
-  for (int i = 0; i < 1000; i++) {
+  for (int i = 0; i < 3000; i++) {
     tr = zr;
     ti = zi;
     zr = tr * tr - ti * ti + cr;
@@ -154,21 +154,19 @@ gl.drawArrays(gl.TRIANGLES, 0, 6);
 
 $(() => {
   const areaSize = 800; // let it be square
-  const selectorSize = 600;
   let centerX = 0;
   let centerY = 0;
-  let scale = 2;
-  $(window).mousemove((e) => {
-    $('#mc').css({ top: Math.floor(e.pageY - selectorSize / 2), left: Math.floor(e.pageX - selectorSize / 2) });
-  }).click((e) => {
+  let scale = 3;
+  $(window).click((e) => {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    const ppu = areaSize / 2 / scale; // pixels per unit
-    centerX -= (areaSize / 2 - e.pageX) / ppu;
-    centerY += (areaSize / 2 - e.pageY) / ppu;
-    scale *= selectorSize / areaSize;
-    console.log(centerX, centerY, scale);
+    const k = 0.8;
+    const ux = 2 * e.pageX / areaSize - 1; // [-1, 1]
+    const uy = 1 - 2 * e.pageY / areaSize; // [1, -1]
+    centerX += scale * ux * (1 - k);
+    centerY += scale * uy * (1 - k);
+    scale *= k;
 
     gl.uniform2fv(centerLoc, [centerX, centerY]);
     gl.uniform1f(scaleLoc, scale);
