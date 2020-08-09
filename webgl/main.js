@@ -1,8 +1,8 @@
 const canvas = document.getElementById('m');
-canvas.width = 800 * 4;
-canvas.height = 800 * 4;
-canvas.style.width = '800px';
-canvas.style.height = '800px';
+canvas.width = 400 * 4;
+canvas.height = 400 * 4;
+canvas.style.width = '400px';
+canvas.style.height = '400px';
 
 gl = canvas.getContext('webgl');
 
@@ -18,6 +18,9 @@ void main() {
 
 const fragment_shader_text = `
 precision mediump float;
+uniform vec2 u_center;
+uniform float u_scale;
+uniform vec3 u_color_waves;
 varying vec2 v_coord;
 void main() {
   float zr;
@@ -27,28 +30,24 @@ void main() {
   float ti;
   float cr;
   float ci;
-  vec2 point_a; // (-1, -1) TODO param
-  vec2 point_b; // (1, 1) TODO
   vec2 trans_k;
   vec2 trans_b;
   vec2 c;
   vec3 color;
-  vec3 color_wave; // TODO attr
   float ln2v;
   //
-  color_wave = vec3(1, 1.1, 1.2);
-  point_a = vec2(-2.2, -1.5);
-  point_b = vec2(.8, 1.5);
-  //
-  trans_k = (point_b - point_a) / 2.;
-  trans_b = (point_b + point_a) / 2.;
+  //trans_k = (u_point_b - u_point_a) / 2.; // minor optimization: could be precalulate on JS side
+  //trans_b = (u_point_b + u_point_a) / 2.;
+
+  //trans_k = vec2(1, 1);
+  //trans_b = vec2(0, 0.5);
   //
   color = vec3(0.);
   zr = 0.;
   zi = 0.;
   //cr = v_coord.x * 2. - .5;
   //ci = v_coord.y * 2.;
-  c = v_coord * trans_k + trans_b;
+  c = v_coord * u_scale + u_center;
   cr = c.x;
   ci = c.y;
   for (int i = 0; i < 1000; i++) {
@@ -60,7 +59,7 @@ void main() {
     if (z2 > 100000.) { // it is enough assuming |c|<1 and color has 256 levels
       // V = log(r2)/pow(n,2) => log2(V) = log2(log(r2)) - n
       ln2v = log2(log(z2)) - float(i);
-      color = (1. - cos(color_wave * ln2v)) / 2.;
+      color = (1. - cos(u_color_waves * ln2v)) / 2.;
       break;
     }
   }
@@ -116,10 +115,11 @@ const positions = [
 ];
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+const centerLoc = gl.getUniformLocation(program, 'u_center'); // get locations on initialization step
+const scaleLoc = gl.getUniformLocation(program, 'u_scale');
+const colorWavesLoc = gl.getUniformLocation(program, 'u_color_waves');
 
-gl.clearColor(0, 0, 0, 0);
-gl.clear(gl.COLOR_BUFFER_BIT);
+gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
 gl.useProgram(program);
 
@@ -128,4 +128,37 @@ gl.enableVertexAttribArray(positionAttributeLocation);
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer); // ONE MORE TIME?? After use program?
 gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
+gl.uniform2fv(centerLoc, [0, 0]); // set on prepare to run step
+gl.uniform1f(scaleLoc, 3);
+gl.uniform3fv(colorWavesLoc, [1, 1.41, 3.14]);
+
+gl.clearColor(0, 0, 0, 0);
+gl.clear(gl.COLOR_BUFFER_BIT);
+
 gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+// ---------------------------- events
+
+$(() => {
+  const areaSize = 400; // let it be square
+  const selectorSize = 300;
+  let centerX = 0;
+  let centerY = 0;
+  let scale = 2;
+  $(window).mousemove((e) => {
+    $('#mc').css({ top: Math.floor(e.pageY - selectorSize / 2), left: Math.floor(e.pageX - selectorSize / 2) });
+  }).click((e) => {
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    const ppu = areaSize / 2 / scale; // pixels per unit
+    centerX -= (areaSize / 2 - e.pageX) / ppu;
+    centerY += (areaSize / 2 - e.pageY) / ppu;
+    scale *= selectorSize / areaSize;
+
+    gl.uniform2fv(centerLoc, [centerX, centerY]);
+    gl.uniform1f(scaleLoc, scale);
+    // gl.uniform3fv(colorWavesLoc, [1 + Math.random(), 1 + Math.random(), 1 + Math.random()]); // random color to see changes
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  });
+});
