@@ -1,8 +1,8 @@
 const canvas = document.getElementById('m');
-canvas.width = 400 * 4;
-canvas.height = 400 * 4;
-canvas.style.width = '400px';
-canvas.style.height = '400px';
+canvas.width = 800 * 2;
+canvas.height = 800 * 2;
+canvas.style.width = '800px';
+canvas.style.height = '800px';
 
 gl = canvas.getContext('webgl');
 
@@ -17,6 +17,13 @@ void main() {
 }`;
 
 const fragment_shader_text = `
+
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+  precision highp float;
+#else
+  precision mediump float;
+#endif
+
 precision mediump float;
 uniform vec2 u_center;
 uniform float u_scale;
@@ -43,11 +50,17 @@ void main() {
   //trans_b = vec2(0, 0.5);
   //
   color = vec3(0.);
+
   zr = 0.;
   zi = 0.;
-  //cr = v_coord.x * 2. - .5;
-  //ci = v_coord.y * 2.;
   c = v_coord * u_scale + u_center;
+
+/* Julia set
+  zr = v_coord.x * u_scale + u_center.x;
+  zi = v_coord.y * u_scale + u_center.y;
+  c = vec2(-1.1347509765625, 0.20691650390625);
+*/
+
   cr = c.x;
   ci = c.y;
   for (int i = 0; i < 1000; i++) {
@@ -140,8 +153,8 @@ gl.drawArrays(gl.TRIANGLES, 0, 6);
 // ---------------------------- events
 
 $(() => {
-  const areaSize = 400; // let it be square
-  const selectorSize = 300;
+  const areaSize = 800; // let it be square
+  const selectorSize = 600;
   let centerX = 0;
   let centerY = 0;
   let scale = 2;
@@ -155,6 +168,7 @@ $(() => {
     centerX -= (areaSize / 2 - e.pageX) / ppu;
     centerY += (areaSize / 2 - e.pageY) / ppu;
     scale *= selectorSize / areaSize;
+    console.log(centerX, centerY, scale);
 
     gl.uniform2fv(centerLoc, [centerX, centerY]);
     gl.uniform1f(scaleLoc, scale);
