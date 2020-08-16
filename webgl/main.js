@@ -67,7 +67,7 @@ void main() {
     zi = 2. * tr * ti + ci;
     z2 = zr * zr + zi * zi;
     if (z2 > 100000.) { // it is enough assuming |c|<1 and color has 256 levels
-      ln2v = log2(log(z2)) - float(i); // V = log(r2)/pow(n,2) => log2(V) = log2(log(r2)) - n
+      ln2v = log2(log(z2)) - float(i); // V = log(r2)/pow(2,n) => log2(V) = log2(log(r2)) - n
       color = (1. - cos(u_color_waves * ln2v)) / 2.;
       break;
     }
