@@ -25,10 +25,13 @@ const fragment_shader_text = `
 #endif
 
 precision mediump float;
+
 uniform vec2 u_center;
 uniform float u_scale;
 uniform vec3 u_color_waves;
+
 varying vec2 v_coord;
+
 void main() {
   float zr;
   float zi;
@@ -37,29 +40,23 @@ void main() {
   float ti;
   float cr;
   float ci;
-  vec2 trans_k;
-  vec2 trans_b;
   vec2 c;
   vec3 color;
   float ln2v;
-  //
-  //trans_k = (u_point_b - u_point_a) / 2.; // minor optimization: could be precalulate on JS side
-  //trans_b = (u_point_b + u_point_a) / 2.;
 
-  //trans_k = vec2(1, 1);
-  //trans_b = vec2(0, 0.5);
-  //
   color = vec3(0.);
 
+#if 1
+  // Mandelbrot set
   zr = 0.;
   zi = 0.;
   c = v_coord * u_scale + u_center;
-
-/* Julia set
+#else
+  // Julia set
   zr = v_coord.x * u_scale + u_center.x;
   zi = v_coord.y * u_scale + u_center.y;
   c = vec2(-1.1347509765625, 0.20691650390625);
-*/
+#endif
 
   cr = c.x;
   ci = c.y;
@@ -70,8 +67,7 @@ void main() {
     zi = 2. * tr * ti + ci;
     z2 = zr * zr + zi * zi;
     if (z2 > 100000.) { // it is enough assuming |c|<1 and color has 256 levels
-      // V = log(r2)/pow(n,2) => log2(V) = log2(log(r2)) - n
-      ln2v = log2(log(z2)) - float(i);
+      ln2v = log2(log(z2)) - float(i); // V = log(r2)/pow(n,2) => log2(V) = log2(log(r2)) - n
       color = (1. - cos(u_color_waves * ln2v)) / 2.;
       break;
     }
@@ -114,10 +110,6 @@ const program = createProgram(gl, vertex_shader, fragment_shader);
 
 console.log(program);
 
-const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
-const positionBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-
 const positions = [
   -1, -1,
   -1, 1,
@@ -126,6 +118,9 @@ const positions = [
   1, 1,
   1, -1,
 ];
+const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+const positionBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
 const centerLoc = gl.getUniformLocation(program, 'u_center'); // get locations on initialization step
@@ -138,7 +133,7 @@ gl.useProgram(program);
 
 gl.enableVertexAttribArray(positionAttributeLocation);
 
-gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer); // ONE MORE TIME?? After use program?
+gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
 gl.uniform2fv(centerLoc, [0, 0]); // set on prepare to run step
@@ -164,13 +159,27 @@ $(() => {
     const k = 0.8;
     const ux = 2 * e.pageX / areaSize - 1; // [-1, 1]
     const uy = 1 - 2 * e.pageY / areaSize; // [1, -1]
-    centerX += scale * ux * (1 - k);
-    centerY += scale * uy * (1 - k);
-    scale *= k;
+    console.log(e)
+    if (!e.shiftKey) {
+      centerX += scale * ux * (1 - k);
+      centerY += scale * uy * (1 - k);
+      scale *= k;
+    } else {
+      scale /= k;
+      centerX -= scale * ux * (1 - k);
+      centerY -= scale * uy * (1 - k);
+    }
 
     gl.uniform2fv(centerLoc, [centerX, centerY]);
     gl.uniform1f(scaleLoc, scale);
     // gl.uniform3fv(colorWavesLoc, [1 + Math.random(), 1 + Math.random(), 1 + Math.random()]); // random color to see changes
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+  });
+  $(window).keypress((ev) => {
+    const c = String.fromCharCode(ev.which).toLowerCase();
+    if (c === ' ') {
+      gl.uniform3fv(colorWavesLoc, [1 + Math.random(), 1 + Math.random(), 1 + Math.random()]); // random color
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
   });
 });
