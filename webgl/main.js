@@ -37,11 +37,12 @@ varying vec2 v_coord;
 const float logp = log(float(POWER));
 
 void main() {
-  float z2;
   vec2 c;
   vec2 z;
-  vec2 s;
   vec3 color;
+  float xx;
+  float yy;
+  float zz;
   float ln_v;
 
   color = vec3(0.);
@@ -57,20 +58,21 @@ void main() {
 #endif
 
   for (int i = 0; i < 3000; i++) {
-    s = vec2(z.x * z.x, z.y * z.y);
-#if (POWER == 4)
-    z = vec2(s.x * s.x - 6. * s.x * s.y + s.y * s.y, 4. * z.x * z.y * (s.x - s.y)) + c;
-#elif (POWER == 3)
-    z = vec2(s.x * z.x - 3. * s.y * z.x, 3. * z.y * s.x - s.y * z.y) + c;
-#else
-    z = vec2(s.x - s.y, 2. * z.x * z.y) + c;
-#endif
-    z2 = s.x + s.y;
-    if (z2 > 100000.) { // it is enough assuming |c|<1 and color has 256 levels
-      ln_v = log(log(z2)) - float(i)*logp; // V = log(r2)/pow(2,n) => log2(V) = log2(log(r2)) - n
+    xx = z.x * z.x;
+    yy = z.y * z.y;
+    zz = xx + yy;
+    if (zz > 100000.) { // it is enough assuming |c|<1 and color has 256 levels
+      ln_v = log(log(zz)) - float(i) * logp; // V = log(r2)/pow(2,n) => log2(V) = log2(log(r2)) - n
       color = (1. - cos(u_color_waves * ln_v)) / 2.;
       break;
     }
+#if (POWER == 4)
+    z = vec2(xx * xx - 6. * xx * yy + yy * yy, 4. * z.x * z.y * (xx - yy)) + c;
+#elif (POWER == 3)
+    z = vec2(xx * z.x - 3. * yy * z.x, 3. * z.y * xx - yy * z.y) + c;
+#else
+    z = vec2(xx - yy, 2. * z.x * z.y) + c;
+#endif
   }
   gl_FragColor = vec4(color, 1);
 }`;
