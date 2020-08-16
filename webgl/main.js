@@ -31,6 +31,7 @@ precision mediump float;
 uniform vec2 u_center;
 uniform float u_scale;
 uniform vec3 u_color_waves;
+uniform float u_color_factor;
 
 varying vec2 v_coord;
 
@@ -63,9 +64,10 @@ void main() {
     zz = xx + yy;
     if (zz > 100000.) { // it is enough assuming |c|<1 and color has 256 levels
       ln_v = log(log(zz)) - float(i) * logp; // V = log(r2)/pow(2,n) => log2(V) = log2(log(r2)) - n
-      color = (1. - cos(u_color_waves * ln_v)) / 2.;
+      color = (1. - cos(u_color_waves * u_color_factor * ln_v)) / 2.;
       break;
     }
+
 #if (POWER == 4)
     z = vec2(xx * xx - 6. * xx * yy + yy * yy, 4. * z.x * z.y * (xx - yy)) + c;
 #elif (POWER == 3)
@@ -73,6 +75,7 @@ void main() {
 #else
     z = vec2(xx - yy, 2. * z.x * z.y) + c;
 #endif
+
   }
   gl_FragColor = vec4(color, 1);
 }`;
@@ -128,6 +131,7 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 const centerLoc = gl.getUniformLocation(program, 'u_center'); // get locations on initialization step
 const scaleLoc = gl.getUniformLocation(program, 'u_scale');
 const colorWavesLoc = gl.getUniformLocation(program, 'u_color_waves');
+const colorFactorLoc = gl.getUniformLocation(program, 'u_color_factor');
 
 gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -141,6 +145,7 @@ gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 gl.uniform2fv(centerLoc, [0, 0]); // set on prepare to run step
 gl.uniform1f(scaleLoc, 3);
 gl.uniform3fv(colorWavesLoc, [1, 1.41, 3.14]);
+gl.uniform1f(colorFactorLoc, 1);
 
 gl.clearColor(0, 0, 0, 0);
 gl.clear(gl.COLOR_BUFFER_BIT);
@@ -154,11 +159,13 @@ $(() => {
   let centerX = 0;
   let centerY = 0;
   let scale = 3;
+  let colorFactor = 1;
   $(window).click((e) => {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    const k = 0.8;
+    //console.log($('#m').offset(), $('#m').width());
+    const k = 0.8; // has to be global const
     const ux = 2 * e.pageX / areaSize - 1; // [-1, 1]
     const uy = 1 - 2 * e.pageY / areaSize; // [1, -1]
     console.log(e)
@@ -174,13 +181,22 @@ $(() => {
 
     gl.uniform2fv(centerLoc, [centerX, centerY]);
     gl.uniform1f(scaleLoc, scale);
-    // gl.uniform3fv(colorWavesLoc, [1 + Math.random(), 1 + Math.random(), 1 + Math.random()]); // random color to see changes
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   });
   $(window).keypress((ev) => {
     const c = String.fromCharCode(ev.which).toLowerCase();
     if (c === ' ') {
       gl.uniform3fv(colorWavesLoc, [1 + Math.random(), 1 + Math.random(), 1 + Math.random()]); // random color
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+    if (c === 'z') {
+      colorFactor *= .90; // has to be global const
+      gl.uniform1f(colorFactorLoc, colorFactor);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+    if (c === 'x') {
+      colorFactor /= .90; // has to be global const
+      gl.uniform1f(colorFactorLoc, colorFactor);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
   });
