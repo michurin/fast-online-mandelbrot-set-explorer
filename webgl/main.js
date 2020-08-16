@@ -17,6 +17,8 @@ void main() {
 }`;
 
 const fragment_shader_text = `
+#define MODE 1
+#define POWER 2
 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
   precision highp float;
@@ -32,43 +34,41 @@ uniform vec3 u_color_waves;
 
 varying vec2 v_coord;
 
+const float logp = log(float(POWER));
+
 void main() {
-  float zr;
-  float zi;
   float z2;
-  float tr;
-  float ti;
-  float cr;
-  float ci;
   vec2 c;
+  vec2 z;
+  vec2 s;
   vec3 color;
-  float ln2v;
+  float ln_v;
 
   color = vec3(0.);
 
-#if 1
+#if (MODE == 1)
   // Mandelbrot set
-  zr = 0.;
-  zi = 0.;
+  z = vec2(0);
   c = v_coord * u_scale + u_center;
 #else
   // Julia set
-  zr = v_coord.x * u_scale + u_center.x;
-  zi = v_coord.y * u_scale + u_center.y;
+  z = v_coord * u_scale + u_center;
   c = vec2(-1.1347509765625, 0.20691650390625);
 #endif
 
-  cr = c.x;
-  ci = c.y;
   for (int i = 0; i < 3000; i++) {
-    tr = zr;
-    ti = zi;
-    zr = tr * tr - ti * ti + cr;
-    zi = 2. * tr * ti + ci;
-    z2 = zr * zr + zi * zi;
+    s = vec2(z.x * z.x, z.y * z.y);
+#if (POWER == 4)
+    z = vec2(s.x * s.x - 6. * s.x * s.y + s.y * s.y, 4. * z.x * z.y * (s.x - s.y)) + c;
+#elif (POWER == 3)
+    z = vec2(s.x * z.x - 3. * s.y * z.x, 3. * z.y * s.x - s.y * z.y) + c;
+#else
+    z = vec2(s.x - s.y, 2. * z.x * z.y) + c;
+#endif
+    z2 = s.x + s.y;
     if (z2 > 100000.) { // it is enough assuming |c|<1 and color has 256 levels
-      ln2v = log2(log(z2)) - float(i); // V = log(r2)/pow(2,n) => log2(V) = log2(log(r2)) - n
-      color = (1. - cos(u_color_waves * ln2v)) / 2.;
+      ln_v = log(log(z2)) - float(i)*logp; // V = log(r2)/pow(2,n) => log2(V) = log2(log(r2)) - n
+      color = (1. - cos(u_color_waves * ln_v)) / 2.;
       break;
     }
   }
