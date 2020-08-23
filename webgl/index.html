@@ -2,13 +2,21 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Mandelgrot WebGL</title>
+    <title>Mandelbrot and Julia sets online explorer. WebGL based</title>
     <link rel="stylesheet" type="text/css" href="main.css">
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8=" crossorigin="anonymous"></script>
     <!-- link rel="icon" href="favicon.ico" type="image/x-icon" -->
   </head>
   <body>
     <table>
+      <tr>
+        <th><h1>Mandelbrot sets<h1></th>
+        <th><h1>Julia sets</h1></th>
+      </tr>
+      <tr>
+        <th><em>click</em> — zoom in; <em>shift</em>+<em>click</em> — zoom out; <em>alt</em>/<em>ctrl</em>-<em>click</em> — setup Julia set</th>
+        <th><em>click</em> — zoom in; <em>shift</em>+<em>click</em> — zoom out</th>
+      </tr>
       <tr>
         <td><canvas id="m2"></canvas></td>
         <td><canvas id="j2"></canvas></td>

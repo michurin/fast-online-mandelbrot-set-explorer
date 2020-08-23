@@ -21,3 +21,20 @@ td button {
   margin: 0;
   font-size: xx-small;
 }
+
+th {
+  font-size: x-small;
+}
+
+th, td {
+  vertical-align: top;
+}
+
+em {
+  font-style: normal;
+  color: #ffa;
+}
+
+h1 {
+  font-size: large;
+}
