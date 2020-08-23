@@ -7,8 +7,6 @@ function init(canvasElementID, canvasSize, superPixelFactor, power, mode) {
 
   const gl = canvas.getContext('webgl');
 
-  console.log(gl);
-
   const vertex_shader_text = `
 attribute vec4 a_position;
 varying vec2 v_coord;
@@ -89,7 +87,6 @@ void main() {
     if (success) {
       return shader;
     }
-    console.log(gl.getShaderInfoLog(shader));
     gl.deleteShader(shader);
   }
 
@@ -102,19 +99,13 @@ void main() {
     if (success) {
       return program;
     }
-
-    console.log(gl.getProgramInfoLog(program));
     gl.deleteProgram(program);
   }
 
   const vertex_shader = createShader(gl, gl.VERTEX_SHADER, vertex_shader_text);
   const fragment_shader = createShader(gl, gl.FRAGMENT_SHADER, fragment_shader_text);
 
-  console.log(vertex_shader, fragment_shader);
-
   const program = createProgram(gl, vertex_shader, fragment_shader);
-
-  console.log(program);
 
   const positions = [
     -1, -1,
@@ -143,73 +134,84 @@ void main() {
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
   gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
 
-  gl.uniform2fv(centerLoc, [0, 0]); // set on prepare to run step
-  gl.uniform1f(scaleLoc, 3);
-  gl.uniform3fv(colorWavesLoc, [1, 1.41, 3.14]);
-  gl.uniform1f(colorFactorLoc, 1);
-
-  gl.clearColor(0, 0, 0, 0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-
-  gl.drawArrays(gl.TRIANGLES, 0, 6);
-
   // ---------------------------- events
 
-  $(() => {
-    let centerX = 0;
-    let centerY = 0;
-    let scale = 3;
-    let colorFactor = 1;
-    $(`#${canvasElementID}`).click((e) => {
-      e.preventDefault();
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
+  const infoElement = $('<p>');
+  const scaleRate = .8;
+  const colorRate = .9;
+  let centerX = 0;
+  let centerY = 0;
+  let scale = 3;
+  let colorFactor = 1;
+  let colorWaves = [1, 1.41, 3.14];
 
-      const offset = $(`#${canvasElementID}`).offset();
-      const k = 0.8; // has to be global const
-      const ux = 2 * (e.pageX - offset.left) / canvasSize - 1; // [-1, 1]
-      const uy = 1 - 2 * (e.pageY - offset.top) / canvasSize; // [1, -1]
-      console.log(e)
-      if (!e.shiftKey) {
-        centerX += scale * ux * (1 - k);
-        centerY += scale * uy * (1 - k);
-        scale *= k;
-      } else {
-        scale /= k;
-        centerX -= scale * ux * (1 - k);
-        centerY -= scale * uy * (1 - k);
-      }
+  function redraw() {
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
 
-      gl.uniform2fv(centerLoc, [centerX, centerY]);
-      gl.uniform1f(scaleLoc, scale);
-      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    gl.uniform2fv(centerLoc, [centerX, centerY]);
+    gl.uniform1f(scaleLoc, scale);
+    gl.uniform3fv(colorWavesLoc, colorWaves);
+    gl.uniform1f(colorFactorLoc, colorFactor);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    infoElement.text(`p1 = (${centerX - scale}, ${centerY - scale}), p2 = (${centerX + scale}, ${centerY + scale}), rgbWL = (${colorWaves[0]}, ${colorWaves[1]}, ${colorWaves[2]}), colorFactor = ${colorFactor}`);
+  }
+
+  redraw();
+
+  $(`#${canvasElementID}`).click((e) => {
+    e.preventDefault();
+
+    const offset = $(`#${canvasElementID}`).offset();
+    const ux = 2 * (e.pageX - offset.left) / canvasSize - 1; // [-1, 1]
+    const uy = 1 - 2 * (e.pageY - offset.top) / canvasSize; // [1, -1]
+
+    if (e.ctrlKey || e.metaKey || e.altKey) {
+      console.log('CTL:', ux * scale + centerX, uy * scale + centerY); // TODO call Julia here!
       return false;
-    });
-    $(window).keypress((ev) => { // TODO!!! UGLY!!!
-      ev.preventDefault();
-      const c = String.fromCharCode(ev.which).toLowerCase();
-      if (c === ' ') {
-        gl.uniform3fv(colorWavesLoc, [1 + Math.random(), 1 + Math.random(), 1 + Math.random()]); // random color
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-      }
-      if (c === 'z') {
-        colorFactor *= .90; // has to be global const
-        gl.uniform1f(colorFactorLoc, colorFactor);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-      }
-      if (c === 'x') {
-        colorFactor /= .90; // has to be global const
-        gl.uniform1f(colorFactorLoc, colorFactor);
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
-      }
-      return false;
-    });
+    }
+
+    console.log(e)
+    if (!e.shiftKey) {
+      centerX += scale * ux * (1 - scaleRate);
+      centerY += scale * uy * (1 - scaleRate);
+      scale *= scaleRate;
+    } else {
+      scale /= scaleRate;
+      centerX -= scale * ux * (1 - scaleRate);
+      centerY -= scale * uy * (1 - scaleRate);
+    }
+
+    redraw();
+    return false;
   });
+  const randomColorElement = $('<button>').text('random color').click(() => {
+    colorWaves = [1 + Math.random(), 1 + Math.random(), 1 + Math.random()];
+    redraw();
+  });
+  const wlIncrElement = $('<button>').text('color wave incr').click(() => {
+    colorFactor *= colorRate;
+    redraw();
+  });
+  const wlDecrElement = $('<button>').text('color wave decr').click(() => {
+    colorFactor /= colorRate;
+    redraw();
+  });
+  $(`#${canvasElementID}ctl`).width(canvasSize).append(
+    infoElement,
+    randomColorElement,
+    wlIncrElement,
+    wlDecrElement
+  );
 }
 
-init('m2', 400, 2, 2, 1);
-init('j2', 400, 2, 2, 2);
-init('m3', 400, 2, 3, 1);
-init('j3', 400, 2, 3, 2);
-init('m4', 400, 2, 4, 1);
-init('j4', 400, 2, 4, 2);
+$(() => {
+  init('m2', 400, 2, 2, 1);
+  init('j2', 400, 2, 2, 2);
+  init('m3', 400, 2, 3, 1);
+  init('j3', 400, 2, 3, 2);
+  init('m4', 400, 2, 4, 1);
+  init('j4', 400, 2, 4, 2);
+});

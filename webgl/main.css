@@ -9,3 +9,15 @@ canvas {
   border-width: 0;
   cursor: crosshair;
 }
+
+td p {
+  padding: 0;
+  margin: 0;
+  font-size: xx-small;
+}
+
+td button {
+  padding: 0, 3px;
+  margin: 0;
+  font-size: xx-small;
+}
