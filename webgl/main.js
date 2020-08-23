@@ -232,14 +232,22 @@ void main() {
   }
 }
 
-function initPair(power, mSize, jSize, mSuperPixel, jSuperPixel) {
-  init(`m${power}`, mSize, mSuperPixel, power, init(`j${power}`, jSize, jSuperPixel, power));
+function initPair(power, mSize, jSize, mSuperPixel, jSuperPixel, next) {
+  // we split literally this:
+  // init(`m${power}`, mSize, mSuperPixel, power, init(`j${power}`, jSize, jSuperPixel, power));
+  setTimeout(() => {
+    const f = init(`j${power}`, jSize, jSuperPixel, power);
+    setTimeout(() => {
+      init(`m${power}`, mSize, mSuperPixel, power, f);
+      if (next) {
+        next();
+      }
+    }, 0);
+  }, 0);
 }
 
 $(() => {
-  let s = Math.floor($(window).width() * .46);
+  let s = Math.floor($(window).width() * .48);
   let dpr = window.devicePixelRatio || 1;
-  initPair(2, s, s, dpr, dpr);
-  initPair(3, s, s, dpr, dpr);
-  initPair(4, s, s, dpr, dpr);
+  initPair(2, s, s, dpr, dpr, () => initPair(3, s, s, dpr, dpr, () => initPair(4, s, s, dpr, dpr)));
 });
