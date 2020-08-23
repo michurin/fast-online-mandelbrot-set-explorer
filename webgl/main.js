@@ -1,4 +1,4 @@
-function init(canvasElementID, canvasSize, superPixelFactor, power, mode) {
+function init(canvasElementID, canvasSize, superPixelFactor, power, mandelbroteMode, juliaSetter) {
   const canvas = document.getElementById(canvasElementID);
   canvas.width = canvasSize * superPixelFactor;
   canvas.height = canvasSize * superPixelFactor;
@@ -16,7 +16,7 @@ void main() {
 }`;
 
   const fragment_shader_text = `
-#define MODE ${mode}
+#define MODE ${mandelbroteMode ? 1 : 0}
 #define POWER ${power}
 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -31,6 +31,7 @@ uniform vec2 u_center;
 uniform float u_scale;
 uniform vec3 u_color_waves;
 uniform float u_color_factor;
+uniform vec2 u_constant; // used in Julia set only; present in Mandelbrot for compat only
 
 varying vec2 v_coord;
 
@@ -54,7 +55,7 @@ void main() {
 #else
   // Julia set
   z = v_coord * u_scale + u_center;
-  c = vec2(-1.1347509765625, 0.20691650390625);
+  c = u_constant;
 #endif
 
   for (int i = 0; i < 3000; i++) {
@@ -124,6 +125,7 @@ void main() {
   const scaleLoc = gl.getUniformLocation(program, 'u_scale');
   const colorWavesLoc = gl.getUniformLocation(program, 'u_color_waves');
   const colorFactorLoc = gl.getUniformLocation(program, 'u_color_factor');
+  const constantLoc = gl.getUniformLocation(program, 'u_constant');
 
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -139,11 +141,17 @@ void main() {
   const infoElement = $('<p>');
   const scaleRate = .8;
   const colorRate = .9;
-  let centerX = 0;
-  let centerY = 0;
-  let scale = 3;
-  let colorFactor = 1;
-  let colorWaves = [1, 1.41, 3.14];
+
+  let centerX;
+  let centerY;
+  let scale;
+  let colorFactor;
+  let colorWaves;
+  let constant = { // actual for Julia set only
+    2: [-0.0756, -0.672792],
+    3: [0.51121146624, 0.47696256768],
+    4: [0.6008026983401629, 0.10638350580552834],
+  }[power];
 
   function redraw() {
     gl.clearColor(0, 0, 0, 0);
@@ -153,13 +161,23 @@ void main() {
     gl.uniform1f(scaleLoc, scale);
     gl.uniform3fv(colorWavesLoc, colorWaves);
     gl.uniform1f(colorFactorLoc, colorFactor);
+    gl.uniform2fv(constantLoc, constant); // Julia only
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    infoElement.text(`p1 = (${centerX - scale}, ${centerY - scale}), p2 = (${centerX + scale}, ${centerY + scale}), rgbWL = (${colorWaves[0]}, ${colorWaves[1]}, ${colorWaves[2]}), colorFactor = ${colorFactor}`);
+    infoElement.text(`p1 = (${centerX - scale}, ${centerY - scale}), p2 = (${centerX + scale}, ${centerY + scale}), rgbWL = (${colorWaves[0]}, ${colorWaves[1]}, ${colorWaves[2]}), colorFactor = ${colorFactor}` + (mandelbroteMode ? '' : ` c=(${constant[0]}, ${constant[1]})`));
   }
 
-  redraw();
+  function reset() {
+    centerX = 0;
+    centerY = 0;
+    scale = 3;
+    colorFactor = 1;
+    colorWaves = [1, 1.41, 3.14];
+    redraw();
+  }
+
+  reset();
 
   $(`#${canvasElementID}`).click((e) => {
     e.preventDefault();
@@ -168,12 +186,11 @@ void main() {
     const ux = 2 * (e.pageX - offset.left) / canvasSize - 1; // [-1, 1]
     const uy = 1 - 2 * (e.pageY - offset.top) / canvasSize; // [1, -1]
 
-    if (e.ctrlKey || e.metaKey || e.altKey) {
-      console.log('CTL:', ux * scale + centerX, uy * scale + centerY); // TODO call Julia here!
+    if ((e.ctrlKey || e.metaKey || e.altKey) && mandelbroteMode) {
+      juliaSetter([ux * scale + centerX, uy * scale + centerY]);
       return false;
     }
 
-    console.log(e)
     if (!e.shiftKey) {
       centerX += scale * ux * (1 - scaleRate);
       centerY += scale * uy * (1 - scaleRate);
@@ -188,7 +205,7 @@ void main() {
     return false;
   });
   const randomColorElement = $('<button>').text('random color').click(() => {
-    colorWaves = [1 + Math.random(), 1 + Math.random(), 1 + Math.random()];
+    colorWaves = [.1 + .9 * Math.random(), .1 + .9 * Math.random(), .1 + .9 * Math.random()];
     redraw();
   });
   const wlIncrElement = $('<button>').text('color wave incr').click(() => {
@@ -203,15 +220,24 @@ void main() {
     infoElement,
     randomColorElement,
     wlIncrElement,
-    wlDecrElement
+    wlDecrElement,
+    $('<button>').text('reset').click(reset)
   );
+  if (!mandelbroteMode) {
+    return (cxy) => {
+      constant = cxy;
+      redraw();
+    }
+  }
 }
 
 $(() => {
-  init('m2', 400, 2, 2, 1);
-  init('j2', 400, 2, 2, 2);
-  init('m3', 400, 2, 3, 1);
-  init('j3', 400, 2, 3, 2);
-  init('m4', 400, 2, 4, 1);
-  init('j4', 400, 2, 4, 2);
+  let s = Math.floor($(window).width() * .46);
+  let f;
+  f = init('j2', s, 2, 2, false);
+  init('m2', s, 2, 2, true, f);
+  f = init('j3', s, 2, 3, false);
+  init('m3', s, 2, 3, true, f);
+  f = init('j4', s, 2, 4, false);
+  init('m4', s, 2, 4, true, f);
 });
