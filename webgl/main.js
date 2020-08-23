@@ -1,8 +1,8 @@
 function init(canvasElementID, canvasSize, superPixelFactor, power, juliaSetter) {
   const mandelbroteMode = !!juliaSetter; // tricky: consider Mandelbrot if Julia setter is not present
   const canvas = document.getElementById(canvasElementID);
-  canvas.width = canvasSize * superPixelFactor;
-  canvas.height = canvasSize * superPixelFactor;
+  canvas.width = Math.floor(canvasSize * superPixelFactor);
+  canvas.height = Math.floor(canvasSize * superPixelFactor);
   canvas.style.width = `${canvasSize}px`;
   canvas.style.height = `${canvasSize}px`;
 
@@ -238,7 +238,8 @@ function initPair(power, mSize, jSize, mSuperPixel, jSuperPixel) {
 
 $(() => {
   let s = Math.floor($(window).width() * .46);
-  initPair(2, s, s, 2, 2);
-  initPair(3, s, s, 2, 2);
-  initPair(4, s, s, 2, 2);
+  let dpr = window.devicePixelRatio || 1;
+  initPair(2, s, s, dpr, dpr);
+  initPair(3, s, s, dpr, dpr);
+  initPair(4, s, s, dpr, dpr);
 });
