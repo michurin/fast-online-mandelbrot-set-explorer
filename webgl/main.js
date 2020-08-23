@@ -1,4 +1,5 @@
-function init(canvasElementID, canvasSize, superPixelFactor, power, mandelbroteMode, juliaSetter) {
+function init(canvasElementID, canvasSize, superPixelFactor, power, juliaSetter) {
+  const mandelbroteMode = !!juliaSetter; // tricky: consider Mandelbrot if Julia setter is not present
   const canvas = document.getElementById(canvasElementID);
   canvas.width = canvasSize * superPixelFactor;
   canvas.height = canvasSize * superPixelFactor;
@@ -179,7 +180,7 @@ void main() {
 
   reset();
 
-  $(`#${canvasElementID}`).click((e) => {
+  $(`#${canvasElementID}`).off().click((e) => {
     e.preventDefault();
 
     const offset = $(`#${canvasElementID}`).offset();
@@ -216,7 +217,7 @@ void main() {
     colorFactor /= colorRate;
     redraw();
   });
-  $(`#${canvasElementID}ctl`).width(canvasSize).append(
+  $(`#${canvasElementID}ctl`).width(canvasSize).empty().append(
     infoElement,
     randomColorElement,
     wlIncrElement,
@@ -231,13 +232,13 @@ void main() {
   }
 }
 
+function initPair(power, mSize, jSize, mSuperPixel, jSuperPixel) {
+  init(`m${power}`, mSize, mSuperPixel, power, init(`j${power}`, jSize, jSuperPixel, power));
+}
+
 $(() => {
   let s = Math.floor($(window).width() * .46);
-  let f;
-  f = init('j2', s, 2, 2, false);
-  init('m2', s, 2, 2, true, f);
-  f = init('j3', s, 2, 3, false);
-  init('m3', s, 2, 3, true, f);
-  f = init('j4', s, 2, 4, false);
-  init('m4', s, 2, 4, true, f);
+  initPair(2, s, s, 2, 2);
+  initPair(3, s, s, 2, 2);
+  initPair(4, s, s, 2, 2);
 });
