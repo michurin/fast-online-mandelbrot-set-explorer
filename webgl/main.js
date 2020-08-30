@@ -206,7 +206,7 @@ void main() {
     return false;
   });
   const randomColorElement = $('<button>').text('random color').click(() => {
-    colorWaves = [.1 + .9 * Math.random(), .1 + .9 * Math.random(), .1 + .9 * Math.random()];
+    colorWaves = [.3 + .7 * Math.random(), .3 + .7 * Math.random(), .3 + .7 * Math.random()];
     redraw();
   });
   const wlIncrElement = $('<button>').text('color wave incr').click(() => {
