@@ -1,5 +1,5 @@
 function init(canvasElementID, canvasSize, superPixelFactor, power, juliaSetter) {
-  const mandelbroteMode = !!juliaSetter; // tricky: consider Mandelbrot if Julia setter is not present
+  const mandelbrotMode = !!juliaSetter; // tricky: consider Mandelbrot if Julia setter is not present
   const canvas = document.getElementById(canvasElementID);
   canvas.width = Math.floor(canvasSize * superPixelFactor);
   canvas.height = Math.floor(canvasSize * superPixelFactor);
@@ -17,7 +17,7 @@ void main() {
 }`;
 
   const fragment_shader_text = `
-#define MODE ${mandelbroteMode ? 1 : 0}
+#define MODE ${mandelbrotMode ? 1 : 0}
 #define POWER ${power}
 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
@@ -166,7 +166,7 @@ void main() {
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    infoElement.text(`p1 = (${centerX - scale}, ${centerY - scale}), p2 = (${centerX + scale}, ${centerY + scale}), rgbWL = (${colorWaves[0]}, ${colorWaves[1]}, ${colorWaves[2]}), colorFactor = ${colorFactor}` + (mandelbroteMode ? '' : ` c=(${constant[0]}, ${constant[1]})`));
+    infoElement.text(`p1 = (${centerX - scale}, ${centerY - scale}), p2 = (${centerX + scale}, ${centerY + scale}), rgbWL = (${colorWaves[0]}, ${colorWaves[1]}, ${colorWaves[2]}), colorFactor = ${colorFactor}` + (mandelbrotMode ? '' : ` c=(${constant[0]}, ${constant[1]})`));
   }
 
   function reset() {
@@ -187,7 +187,7 @@ void main() {
     const ux = 2 * (e.pageX - offset.left) / canvasSize - 1; // [-1, 1]
     const uy = 1 - 2 * (e.pageY - offset.top) / canvasSize; // [1, -1]
 
-    if ((e.ctrlKey || e.metaKey || e.altKey) && mandelbroteMode) {
+    if ((e.ctrlKey || e.metaKey || e.altKey) && mandelbrotMode) {
       juliaSetter([ux * scale + centerX, uy * scale + centerY]);
       return false;
     }
@@ -224,7 +224,7 @@ void main() {
     wlDecrElement,
     $('<button>').text('reset').click(reset)
   );
-  if (!mandelbroteMode) {
+  if (!mandelbrotMode) {
     return (cxy) => {
       constant = cxy;
       redraw();
