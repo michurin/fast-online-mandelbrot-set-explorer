@@ -1,14 +1,6 @@
 Fast online Mandelbrot set explorer
 ===================================
 
----
-
-*upd:* I started this project to play with Web Workers API. However, it turned out that WebGL much much more faster.
-I'm playing with it here
-[https://michurin.github.io/fast-online-mandelbrot-set-explorer/webgl](https://michurin.github.io/fast-online-mandelbrot-set-explorer/webgl)
-
----
-
 [https://michurin.github.io/fast-online-mandelbrot-set-explorer/](https://michurin.github.io/fast-online-mandelbrot-set-explorer/)
 
 Status
@@ -16,30 +8,22 @@ Status
 
 Just for fun project. It's not totally finished.
 
+Limitations
+-----------
+
+This solution is based on WebGL. So, it doesn't work in old browsers and hardware.
+
 Motivation
 ----------
 
-There are a lot of Mandelbrot exploring project, that are focused on palete selection and butiful result.
-The goal of the project, in contrast, is to create online fast Mandelbrot viewer that will provide *full information* about image.
-It helps you to find beautiful place and then you could use offline tools to create high resolution and custom colored image.
+There are a lot of Mandelbrot exploring project, that are focused on
+palette selection and beautiful result.
+The goal of the project, in contrast, is to create online
+fast Mandelbrot and Julia sets viewer that will provide
+*full information* about image.
 
-TODO
-----
-
-- Custom zoom (UI)
-- Fast zoom (just scale existing image first)
-- Show details (UI)
-- Settings (UI and minor refactoring: split arena initialization)
-- Julia set (refactoring of workers pool and UI)
-
-No plans to
------------
-
-- Support of all browsers. I don't use tricky and magical things.
-  However, if you browser doesn't support web workers and canvas, I'm sorry.
-  I'm not going to develop some fallbacks to support all browsers.
-- Develop powerfull palleter editor.
-- Provide an ability to prepare high quolity/resolution images for downloading.
+It helps you to find beautiful place and then you could use
+offline tools to create high resolution and custom colored image.
 
 Resources
 ---------
