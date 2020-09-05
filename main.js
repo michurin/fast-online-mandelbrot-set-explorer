@@ -1,3 +1,26 @@
+function createShader(gl, type, text) {
+  const shader = gl.createShader(type);
+  gl.shaderSource(shader, text);
+  gl.compileShader(shader);
+  const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
+  if (success) {
+    return shader;
+  }
+  gl.deleteShader(shader);
+}
+
+function createProgram(gl, vertexShader, fragmentShader) {
+  const program = gl.createProgram();
+  gl.attachShader(program, vertexShader);
+  gl.attachShader(program, fragmentShader);
+  gl.linkProgram(program);
+  const success = gl.getProgramParameter(program, gl.LINK_STATUS);
+  if (success) {
+    return program;
+  }
+  gl.deleteProgram(program);
+}
+
 function init(canvasElementID, canvasSize, superPixelFactor, power, juliaSetter) {
   const mandelbrotMode = !!juliaSetter; // tricky: consider Mandelbrot if Julia setter is not present
   const canvas = document.getElementById(canvasElementID);
@@ -8,7 +31,7 @@ function init(canvasElementID, canvasSize, superPixelFactor, power, juliaSetter)
 
   const gl = canvas.getContext('webgl');
 
-  const vertex_shader_text = `
+  const vertexShaderText = `
 attribute vec4 a_position;
 varying vec2 v_coord;
 void main() {
@@ -16,17 +39,11 @@ void main() {
   gl_Position = a_position;
 }`;
 
-  const fragment_shader_text = `
+  const fragmentShaderText = `
 #define MODE ${mandelbrotMode ? 1 : 0}
 #define POWER ${power}
 
-#ifdef GL_FRAGMENT_PRECISION_HIGH
-  precision highp float;
-#else
-  precision mediump float;
-#endif
-
-precision mediump float;
+precision highp float;
 
 uniform vec2 u_center;
 uniform float u_scale;
@@ -81,33 +98,10 @@ void main() {
   gl_FragColor = vec4(color, 1);
 }`;
 
-  function createShader(gl, type, text) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, text);
-    gl.compileShader(shader);
-    const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
-    if (success) {
-      return shader;
-    }
-    gl.deleteShader(shader);
-  }
-
-  function createProgram(gl, vertexShader, fragmentShader) {
-    const program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    const success = gl.getProgramParameter(program, gl.LINK_STATUS);
-    if (success) {
-      return program;
-    }
-    gl.deleteProgram(program);
-  }
-
-  const vertex_shader = createShader(gl, gl.VERTEX_SHADER, vertex_shader_text);
-  const fragment_shader = createShader(gl, gl.FRAGMENT_SHADER, fragment_shader_text);
-
-  const program = createProgram(gl, vertex_shader, fragment_shader);
+  const program = createProgram(
+    gl,
+    createShader(gl, gl.VERTEX_SHADER, vertexShaderText),
+    createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderText));
 
   const positions = [
     -1, -1,
@@ -117,25 +111,22 @@ void main() {
     1, 1,
     1, -1,
   ];
-  const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
-  const positionBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
+  const positionAttributeLoc = gl.getAttribLocation(program, 'a_position');
   const centerLoc = gl.getUniformLocation(program, 'u_center'); // get locations on initialization step
   const scaleLoc = gl.getUniformLocation(program, 'u_scale');
   const colorWavesLoc = gl.getUniformLocation(program, 'u_color_waves');
   const colorFactorLoc = gl.getUniformLocation(program, 'u_color_factor');
   const constantLoc = gl.getUniformLocation(program, 'u_constant');
 
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-  gl.useProgram(program);
-
-  gl.enableVertexAttribArray(positionAttributeLocation);
-
+  const positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-  gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(positionAttributeLoc);
+  gl.vertexAttribPointer(positionAttributeLoc, 2, gl.FLOAT, false, 0, 0);
+
+  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+  gl.useProgram(program);
 
   // ---------------------------- events
 
