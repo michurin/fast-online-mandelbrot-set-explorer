@@ -7,6 +7,7 @@ function createShader(gl, type, text) {
     return shader;
   }
   gl.deleteShader(shader);
+  throw Error(`Can not create shader: ${gl.getShaderInfoLog(shader)}`);
 }
 
 function createProgram(gl, vertexShader, fragmentShader) {
@@ -19,10 +20,11 @@ function createProgram(gl, vertexShader, fragmentShader) {
     return program;
   }
   gl.deleteProgram(program);
+  throw Error(`Can not link program: ${gl.getProgramInfoLog(program)}`);
 }
 
 function init(canvasElementID, canvasSize, superPixelFactor, power, juliaSetter) {
-  const mandelbrotMode = !!juliaSetter; // tricky: consider Mandelbrot if Julia setter is not present
+  const mandelbrotMode = !!juliaSetter; // tricky: consider Mandelbrot if Julia setter is present
   const canvas = document.getElementById(canvasElementID);
   canvas.width = Math.floor(canvasSize * superPixelFactor);
   canvas.height = Math.floor(canvasSize * superPixelFactor);
@@ -101,7 +103,8 @@ void main() {
   const program = createProgram(
     gl,
     createShader(gl, gl.VERTEX_SHADER, vertexShaderText),
-    createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderText));
+    createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderText),
+  );
 
   const positions = [
     -1, -1,
@@ -131,8 +134,8 @@ void main() {
   // ---------------------------- events
 
   const infoElement = $('<p>');
-  const scaleRate = .8;
-  const colorRate = .9;
+  const scaleRate = 0.8;
+  const colorRate = 0.9;
 
   let centerX;
   let centerY;
@@ -157,7 +160,7 @@ void main() {
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
-    infoElement.text(`p1 = (${centerX - scale}, ${centerY - scale}), p2 = (${centerX + scale}, ${centerY + scale}), rgbWL = (${colorWaves[0]}, ${colorWaves[1]}, ${colorWaves[2]}), colorFactor = ${colorFactor}` + (mandelbrotMode ? '' : ` c=(${constant[0]}, ${constant[1]})`));
+    infoElement.text(`p1 = (${centerX - scale}, ${centerY - scale}), p2 = (${centerX + scale}, ${centerY + scale}), rgbWL = (${colorWaves[0]}, ${colorWaves[1]}, ${colorWaves[2]}), colorFactor = ${colorFactor}${mandelbrotMode ? '' : ` c=(${constant[0]}, ${constant[1]})`}`);
   }
 
   function reset() {
@@ -175,8 +178,8 @@ void main() {
     e.preventDefault();
 
     const offset = $(`#${canvasElementID}`).offset();
-    const ux = 2 * (e.pageX - offset.left) / canvasSize - 1; // [-1, 1]
-    const uy = 1 - 2 * (e.pageY - offset.top) / canvasSize; // [1, -1]
+    const ux = (2 * (e.pageX - offset.left)) / canvasSize - 1; // [-1, 1]
+    const uy = 1 - (2 * (e.pageY - offset.top)) / canvasSize; // [1, -1]
 
     if ((e.ctrlKey || e.metaKey || e.altKey) && mandelbrotMode) {
       juliaSetter([ux * scale + centerX, uy * scale + centerY]);
@@ -197,7 +200,7 @@ void main() {
     return false;
   });
   const randomColorElement = $('<button>').text('random color').click(() => {
-    colorWaves = [.3 + .7 * Math.random(), .3 + .7 * Math.random(), .3 + .7 * Math.random()];
+    colorWaves = [0.3 + 0.7 * Math.random(), 0.3 + 0.7 * Math.random(), 0.3 + 0.7 * Math.random()];
     redraw();
   });
   const wlIncrElement = $('<button>').text('color wave incr').click(() => {
@@ -213,14 +216,15 @@ void main() {
     randomColorElement,
     wlIncrElement,
     wlDecrElement,
-    $('<button>').text('reset').click(reset)
+    $('<button>').text('reset').click(reset),
   );
-  if (!mandelbrotMode) {
-    return (cxy) => {
-      constant = cxy;
-      redraw();
-    }
+  if (mandelbrotMode) {
+    return undefined;
   }
+  return (cxy) => {
+    constant = cxy;
+    redraw();
+  };
 }
 
 function initPair(power, mSize, jSize, mSuperPixel, jSuperPixel, next) {
@@ -238,7 +242,7 @@ function initPair(power, mSize, jSize, mSuperPixel, jSuperPixel, next) {
 }
 
 $(() => {
-  let s = Math.floor($(window).width() * .48);
-  let dpr = window.devicePixelRatio || 1;
+  const s = Math.floor($(window).width() * 0.48);
+  const dpr = window.devicePixelRatio || 1;
   initPair(2, s, s, dpr, dpr, () => initPair(3, s, s, dpr, dpr, () => initPair(4, s, s, dpr, dpr)));
 });
