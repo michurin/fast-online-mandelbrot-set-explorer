@@ -1,6 +1,8 @@
 Fast online Mandelbrot set explorer
 ===================================
 
+[![Build Status](https://travis-ci.org/michurin/fast-online-mandelbrot-set-explorer.svg?branch=master)](https://travis-ci.org/michurin/fast-online-mandelbrot-set-explorer)
+
 [https://michurin.github.io/fast-online-mandelbrot-set-explorer/](https://michurin.github.io/fast-online-mandelbrot-set-explorer/)
 
 Status
