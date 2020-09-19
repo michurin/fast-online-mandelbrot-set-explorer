@@ -6,8 +6,9 @@ function createShader(gl, type, text) {
   if (success) {
     return shader;
   }
+  const log = gl.getShaderInfoLog(shader);
   gl.deleteShader(shader);
-  throw Error(`Can not create shader: ${gl.getShaderInfoLog(shader)}`);
+  throw Error(`Can not create shader: ${log}`);
 }
 
 function createProgram(gl, vertexShader, fragmentShader) {
@@ -19,8 +20,9 @@ function createProgram(gl, vertexShader, fragmentShader) {
   if (success) {
     return program;
   }
+  const log = gl.getProgramInfoLog(program);
   gl.deleteProgram(program);
-  throw Error(`Can not link program: ${gl.getProgramInfoLog(program)}`);
+  throw Error(`Can not link program: ${log}`);
 }
 
 function init(canvasElementID, canvasSize, superPixelFactor, power, juliaSetter) {
