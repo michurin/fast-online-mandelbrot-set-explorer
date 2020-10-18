@@ -38,3 +38,17 @@ em {
 h1 {
   font-size: large;
 }
+
+p {
+  padding: 1em 0;
+  margin: 2px;
+  font-size: xx-small;
+}
+
+a {
+  color: #ccc;
+}
+
+a:hover, a:active {
+  color: #fff;
+}
