@@ -27,6 +27,12 @@ fast Mandelbrot and Julia sets viewer that will provide
 It helps you to find beautiful place and then you could use
 offline tools to create high resolution and custom colored image.
 
+Tips and tricks
+---------------
+
+If you wish to render high resolution you are free to tweak
+canvas size using your browser's developer tools.
+
 Resources
 ---------
 
