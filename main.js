@@ -160,7 +160,10 @@ void main() {
     gl.uniform1f(colorFactorLoc, colorFactor);
     gl.uniform2fv(constantLoc, constant); // Julia only
 
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height); // it's not necessary; we update viewport in case user edited canvas properties manually
+    // it's not necessary line
+    // we update viewport in case user edited canvas properties manually
+    // using browser's developer tools
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
