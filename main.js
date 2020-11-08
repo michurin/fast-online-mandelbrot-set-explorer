@@ -160,6 +160,8 @@ void main() {
     gl.uniform1f(colorFactorLoc, colorFactor);
     gl.uniform2fv(constantLoc, constant); // Julia only
 
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height); // it's not necessary; we update viewport in case user edited canvas properties manually
+
     gl.drawArrays(gl.TRIANGLES, 0, 6);
 
     infoElement.text(`p1 = (${centerX - scale}, ${centerY - scale}), p2 = (${centerX + scale}, ${centerY + scale}), rgbWL = (${colorWaves[0]}, ${colorWaves[1]}, ${colorWaves[2]}), colorFactor = ${colorFactor}${mandelbrotMode ? '' : ` c=(${constant[0]}, ${constant[1]})`}`);
