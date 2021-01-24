@@ -42,3 +42,4 @@ Resources
 - [Ideas for UI](https://www.shadertoy.com/view/3dfBDN)
 - [UI (paletter editor)](http://math.hws.edu/eck/js/mandelbrot/MB.html)
 - [Optimisation hints](https://www.math.univ-toulouse.fr/~cheritat/wiki-draw/index.php/Mandelbrot_set)
+- [Clear and straightforward code (pure C)](https://github.com/josch/mandelbrot)
