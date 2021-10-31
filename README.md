@@ -1,24 +1,18 @@
-Fast online Mandelbrot set explorer
-===================================
-
-[![Build Status](https://travis-ci.org/michurin/fast-online-mandelbrot-set-explorer.svg?branch=master)](https://travis-ci.org/michurin/fast-online-mandelbrot-set-explorer)
+# Fast online Mandelbrot set explorer [![test](https://github.com/michurin/fast-online-mandelbrot-set-explorer/actions/workflows/ci.yml/badge.svg)](https://github.com/michurin/fast-online-mandelbrot-set-explorer/actions/workflows/ci.yml)
 
 [https://michurin.github.io/fast-online-mandelbrot-set-explorer/](https://michurin.github.io/fast-online-mandelbrot-set-explorer/)
 
-Status
-------
+## Status
 
 Just for fun project. It's not totally finished.
 
-Limitations
------------
+## Limitations
 
 This solution is based on WebGL. So, it doesn't work in old browsers and hardware.
 
-Motivation
-----------
+## Motivation
 
-There are a lot of Mandelbrot exploring project, that are focused on
+There are a lot of Mandelbrot exploring projects, that are focused on
 palette selection and beautiful result.
 The goal of the project, in contrast, is to create online
 fast Mandelbrot and Julia sets viewer that will provide
@@ -27,14 +21,19 @@ fast Mandelbrot and Julia sets viewer that will provide
 It helps you to find beautiful place and then you could use
 offline tools to create high resolution and custom colored image.
 
-Tips and tricks
----------------
+## Tips and tricks
 
 If you wish to render high resolution you are free to tweak
 canvas size using your browser's developer tools.
 
-Resources
----------
+Say something like this on browser debug console:
+
+```javascript
+a = b = 1000; // use a!=b on retina
+$($('canvas').get(1)).attr({width: a, height: a, style: `width: ${b}px; height: ${b}px;`});
+```
+
+## Resources
 
 - [Explanation of the Mandelbrot Set (video)](https://youtu.be/9gk_8mQuerg)
 - [Best Mandelbrot](https://www.math.univ-toulouse.fr/~cheritat/wiki-draw/index.php/Mandelbrot_set)
