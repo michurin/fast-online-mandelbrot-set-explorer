@@ -14,12 +14,13 @@ def flat(x1, x2, y1, y2, steps_per_unit, tp=None):
 
 def main():
     boilout = 100.
-    f = flat(-3, 3, -3, 3, 100)
+    iterations = 50
+    f = flat(-3, 3, -3, 3, 150)
     assert str(f.dtype) == 'complex256'
     z = np.zeros(f.shape).astype(f.dtype)
     assert str(z.dtype) == 'complex256'
     n = np.zeros(f.shape).astype(np.int)
-    for i in range(150):
+    for i in range(iterations):
         print('Iter', i)
         a = np.abs(z)
         m = a <= boilout
@@ -33,9 +34,9 @@ def main():
     v = np.zeros(f.shape).astype(np.float)  # plt.show() can not manage np.double
     m = np.logical_not(m)
     v[m] = n[m] - np.log(np.log(np.abs(z[m])))/np.log(2)
-    plt.imshow(v, vmin=0, vmax=100)
+    plt.imshow(v)
 
-    plt.colorbar().set_label('label')
+    plt.colorbar().set_label('n (smooth)')
     plt.show()
 
 if __name__ == '__main__':
